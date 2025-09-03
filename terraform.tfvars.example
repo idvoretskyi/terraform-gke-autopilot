@@ -1,0 +1,28 @@
+# Example configuration file
+# Copy this file to terraform.tfvars and modify as needed
+
+# Basic cluster configuration
+cluster_name = "my-autopilot-cluster"
+environment  = "dev"
+# region     = "us-central1"  # Leave empty to use gcloud config
+# project_id = "my-project"   # Leave empty to use gcloud config
+
+# Cost optimization settings
+cost_center = "engineering"
+max_cpu_cores = 50
+max_memory_gb = 200
+
+# Observability (cost-optimized defaults)
+enable_managed_prometheus = false
+logging_components   = ["SYSTEM_COMPONENTS"]
+monitoring_components = ["SYSTEM_COMPONENTS"]
+
+# Security settings
+enable_private_cluster = false
+enable_network_policy  = false
+
+# Labels for cost tracking
+labels = {
+  team    = "platform"
+  purpose = "development"
+}

@@ -1,0 +1,81 @@
+version: 2
+updates:
+  # Terraform provider updates
+  - package-ecosystem: "terraform"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "idvoretskyi"
+    assignees:
+      - "idvoretskyi"
+    commit-message:
+      prefix: "terraform"
+      prefix-development: "terraform"
+    labels:
+      - "dependencies"
+      - "terraform"
+      - "automerge"
+
+  # Terraform module updates
+  - package-ecosystem: "terraform"
+    directory: "/modules/gke-autopilot"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "idvoretskyi"
+    assignees:
+      - "idvoretskyi"
+    commit-message:
+      prefix: "terraform(module)"
+      prefix-development: "terraform(module)"
+    labels:
+      - "dependencies"
+      - "terraform"
+      - "module"
+
+  # Go dependencies for tests
+  - package-ecosystem: "gomod"
+    directory: "/tests"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:30"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "idvoretskyi"
+    assignees:
+      - "idvoretskyi"
+    commit-message:
+      prefix: "go"
+      prefix-development: "go"
+    labels:
+      - "dependencies"
+      - "go"
+      - "tests"
+
+  # GitHub Actions updates
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "idvoretskyi"
+    assignees:
+      - "idvoretskyi"
+    commit-message:
+      prefix: "ci"
+      prefix-development: "ci"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "ci"

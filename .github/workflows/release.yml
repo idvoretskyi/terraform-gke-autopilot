@@ -1,0 +1,79 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ~1.6
+    
+    - name: Validate Terraform
+      run: |
+        terraform fmt -check -recursive .
+        terraform init -backend=false
+        terraform validate
+        cd modules/gke-autopilot
+        terraform init -backend=false
+        terraform validate
+    
+    - name: Generate changelog
+      id: changelog
+      run: |
+        # Simple changelog generation
+        PREVIOUS_TAG=$(git tag --sort=-version:refname | head -2 | tail -1)
+        if [ -z "$PREVIOUS_TAG" ]; then
+          PREVIOUS_TAG=$(git rev-list --max-parents=0 HEAD)
+        fi
+        
+        echo "## Changes" > CHANGELOG.md
+        git log --pretty=format:"- %s" ${PREVIOUS_TAG}..HEAD >> CHANGELOG.md
+        
+        # Read changelog content
+        echo "changelog<<EOF" >> $GITHUB_OUTPUT
+        cat CHANGELOG.md >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+    
+    - name: Create Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+          # Terraform GKE Autopilot ${{ github.ref }}
+          
+          ${{ steps.changelog.outputs.changelog }}
+          
+          ## Usage
+          
+          To use this version as a Terraform module:
+          
+          ```hcl
+          module "gke_autopilot" {
+            source = "github.com/idvoretskyi/terraform-gke-autopilot//modules/gke-autopilot?ref=${{ github.ref }}"
+            
+            cluster_name = "my-cluster"
+            environment  = "prod"
+            # ... other variables
+          }
+          ```
+        draft: false
+        prerelease: false
