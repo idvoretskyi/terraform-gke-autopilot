@@ -73,14 +73,14 @@ resource "google_container_cluster" "autopilot_cluster" {
     security_group = var.rbac_security_group
   }
 
-    # Intranode visibility cannot be enabled on Autopilot
+  # Intranode visibility cannot be enabled on Autopilot
 
   # Autopilot manages IPs; keep minimal explicit config
-    // checkov:skip=CKV_GCP_69: GKE Autopilot enforces GKE Metadata Server and Workload Identity; node_config not configurable
-    ip_allocation_policy {
-      cluster_secondary_range_name  = "pods"
-      services_secondary_range_name = "services"
-    }
+  // checkov:skip=CKV_GCP_69: GKE Autopilot enforces GKE Metadata Server and Workload Identity; node_config not configurable
+  ip_allocation_policy {
+    cluster_secondary_range_name  = "pods"
+    services_secondary_range_name = "services"
+  }
 
   # Cost-efficient observability: limit to system components
   logging_config {
@@ -112,7 +112,7 @@ resource "google_compute_subnetwork" "gke" {
   network       = google_compute_network.gke.id
   project       = local.project_id
 
-    # purpose = "PRIVATE"  # Dropped to avoid invalid values
+  # purpose = "PRIVATE"  # Dropped to avoid invalid values
 
   # Enable VPC flow logs via log_config (enable_flow_logs is deprecated)
   log_config {
