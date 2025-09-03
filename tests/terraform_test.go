@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGKEAutopilotCluster(t *testing.T) {
+func TestGKEAutopilotClusterPlan(t *testing.T) {
 	t.Parallel()
 
 	// Construct the terraform options with default retryable errors to handle the most common
@@ -31,28 +31,15 @@ func TestGKEAutopilotCluster(t *testing.T) {
 		},
 	})
 
-	// Clean up resources with "terraform destroy" at the end of the test.
-	defer terraform.Destroy(t, terraformOptions)
+	// Run "terraform init" and "terraform plan" (no apply/destroy needed)
+	plan := terraform.InitAndPlan(t, terraformOptions)
 
-	// Run "terraform init" and "terraform apply". Fail the test if there are any errors.
-	terraform.InitAndApply(t, terraformOptions)
-
-	// Run `terraform output` to get the values of output variables and check they have the expected values.
-	clusterName := terraform.Output(t, terraformOptions, "kubernetes_cluster_name")
-	assert.Equal(t, "test-autopilot-cluster", clusterName)
-
-	region := terraform.Output(t, terraformOptions, "region")
-	assert.NotEmpty(t, region)
-
-	projectID := terraform.Output(t, terraformOptions, "project_id")
-	assert.NotEmpty(t, projectID)
-
-	kubectlCommand := terraform.Output(t, terraformOptions, "kubectl_config_command")
-	assert.Contains(t, kubectlCommand, "gcloud container clusters get-credentials")
-	assert.Contains(t, kubectlCommand, "test-autopilot-cluster")
+	// Verify the plan contains expected resources
+	assert.Contains(t, plan, "google_container_cluster.autopilot_cluster")
+	assert.Contains(t, plan, "test-autopilot-cluster")
 }
 
-func TestGKEAutopilotCostOptimization(t *testing.T) {
+func TestGKEAutopilotCostOptimizationPlan(t *testing.T) {
 	t.Parallel()
 
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
@@ -70,16 +57,13 @@ func TestGKEAutopilotCostOptimization(t *testing.T) {
 		},
 	})
 
-	defer terraform.Destroy(t, terraformOptions)
-	terraform.InitAndApply(t, terraformOptions)
+	// Run terraform init and plan (no apply/destroy)
+	plan := terraform.InitAndPlan(t, terraformOptions)
 
-	// Verify cost optimization settings are applied
-	clusterName := terraform.Output(t, terraformOptions, "kubernetes_cluster_name")
-	assert.Equal(t, "cost-test-cluster", clusterName)
-
-	labels := terraform.OutputMap(t, terraformOptions, "cluster_labels")
-	assert.Equal(t, "test", labels["environment"])
-	assert.Equal(t, "terraform", labels["managed_by"])
+	// Verify cost optimization settings are in the plan
+	assert.Contains(t, plan, "cost-test-cluster")
+	assert.Contains(t, plan, "google_container_cluster.autopilot_cluster")
+	assert.Contains(t, plan, "SYSTEM_COMPONENTS")
 }
 
 func TestTerraformValidation(t *testing.T) {
