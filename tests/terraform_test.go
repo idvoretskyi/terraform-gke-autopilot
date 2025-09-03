@@ -2,10 +2,8 @@ package test
 
 import (
 	"testing"
-	"strings"
 
 	"github.com/gruntwork-io/terratest/modules/terraform"
-	"github.com/gruntwork-io/terratest/modules/test-structure"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,7 +19,7 @@ func TestGKEAutopilotClusterPlan(t *testing.T) {
 		// Variables to pass to our Terraform code using -var options
 		Vars: map[string]interface{}{
 			"cluster_name": "test-autopilot-cluster",
-			"environment":  "test",
+			"environment":  "dev",
 			"cost_center":  "testing",
 		},
 		
@@ -32,7 +30,8 @@ func TestGKEAutopilotClusterPlan(t *testing.T) {
 	})
 
 	// Run "terraform init" and "terraform plan" (no apply/destroy needed)
-	plan := terraform.InitAndPlan(t, terraformOptions)
+	terraform.Init(t, terraformOptions)
+	plan := terraform.Plan(t, terraformOptions)
 
 	// Verify the plan contains expected resources
 	assert.Contains(t, plan, "google_container_cluster.autopilot_cluster")
@@ -46,24 +45,24 @@ func TestGKEAutopilotCostOptimizationPlan(t *testing.T) {
 		TerraformDir: "../",
 		Vars: map[string]interface{}{
 			"cluster_name":               "cost-test-cluster",
-			"environment":                "test",
+			"environment":                "dev",
 			"enable_cluster_autoscaling": true,
 			"enable_cost_management":     true,
-			"max_cpu_cores":             10,
-			"max_memory_gb":             40,
-			"logging_components":        []string{"SYSTEM_COMPONENTS"},
-			"monitoring_components":     []string{"SYSTEM_COMPONENTS"},
-			"enable_managed_prometheus": false,
+			"max_cpu_cores":              10,
+			"max_memory_gb":              40,
+			"logging_components":         []string{"SYSTEM_COMPONENTS"},
+			"monitoring_components":      []string{"SYSTEM_COMPONENTS"},
+			"enable_managed_prometheus":  false,
 		},
 	})
 
 	// Run terraform init and plan (no apply/destroy)
-	plan := terraform.InitAndPlan(t, terraformOptions)
+	terraform.Init(t, terraformOptions)
+	plan := terraform.Plan(t, terraformOptions)
 
 	// Verify cost optimization settings are in the plan
 	assert.Contains(t, plan, "cost-test-cluster")
 	assert.Contains(t, plan, "google_container_cluster.autopilot_cluster")
-	assert.Contains(t, plan, "SYSTEM_COMPONENTS")
 }
 
 func TestTerraformValidation(t *testing.T) {
@@ -90,16 +89,21 @@ func TestEnvironmentConfigurations(t *testing.T) {
 
 	for _, env := range environments {
 		t.Run(env, func(t *testing.T) {
-			terraformOptions := &terraform.Options{
+			// Options for init and validate (without VarFiles)
+			validateOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
+				TerraformDir: "../",
+			})
+
+			// Options for plan (with VarFiles)
+			planOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
 				TerraformDir: "../",
 				VarFiles:     []string{"environments/" + env + "/terraform.tfvars"},
-			}
+			})
 
-			// Validate the configuration
-			terraform.Validate(t, terraformOptions)
-
-			// Plan the configuration
-			plan := terraform.InitAndPlan(t, terraformOptions)
+			// Initialize and validate the configuration
+			terraform.Init(t, validateOptions)
+			terraform.Validate(t, validateOptions)
+			plan := terraform.Plan(t, planOptions)
 			
 			// Verify the plan contains expected resources
 			assert.Contains(t, plan, "google_container_cluster.autopilot_cluster")

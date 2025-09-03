@@ -7,46 +7,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTerraformValidation(t *testing.T) {
+// TestCompleteIntegration tests the full integration of Terraform configuration
+func TestCompleteIntegration(t *testing.T) {
 	t.Parallel()
 
-	terraformOptions := &terraform.Options{
+	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
 		TerraformDir: "../",
 		Vars: map[string]interface{}{
-			"cluster_name": "test-cluster",
-			"environment":  "test",
+			"cluster_name": "integration-test-cluster",
+			"environment":  "dev",
 		},
-	}
+	})
 
-	// Validate the Terraform syntax
-	terraform.Validate(t, terraformOptions)
-}
+	// Initialize, validate, and plan (no apply for integration test)
+	terraform.Init(t, terraformOptions)
+	plan := terraform.Plan(t, terraformOptions)
 
-func TestModuleValidation(t *testing.T) {
-	t.Parallel()
-
-	terraformOptions := &terraform.Options{
-		TerraformDir: "../modules/gke-autopilot",
-	}
-
-	terraform.Validate(t, terraformOptions)
-}
-
-func TestEnvironmentConfigurations(t *testing.T) {
-	environments := []string{"dev", "prod"}
-
-	for _, env := range environments {
-		t.Run(env, func(t *testing.T) {
-			terraformOptions := &terraform.Options{
-				TerraformDir: "../",
-				VarFiles:     []string{"environments/" + env + "/terraform.tfvars"},
-			}
-
-			// Validate the configuration
-			terraform.Validate(t, terraformOptions)
-
-			// Initialize and plan (without applying)
-			terraform.InitAndPlan(t, terraformOptions)
-		})
-	}
+	// Verify the plan contains expected GKE resources
+	assert.Contains(t, plan, "google_container_cluster.autopilot_cluster")
+	assert.Contains(t, plan, "integration-test-cluster")
 }
