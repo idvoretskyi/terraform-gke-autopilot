@@ -150,7 +150,7 @@ variable "maintenance_end_time" {
 }
 
 variable "release_channel" {
-  description = "Release channel (STABLE recommended for cost predictability)"
+  description = "Release channel (RAPID for latest Kubernetes versions)"
   type        = string
-  default     = "STABLE"
+  default     = "RAPID"
 }

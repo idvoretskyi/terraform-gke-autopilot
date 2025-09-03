@@ -126,9 +126,10 @@ resource "google_container_cluster" "autopilot_cluster" {
   }
   monitoring_config {
     enable_components = var.monitoring_components
-    managed_prometheus {
-      enabled = var.enable_managed_prometheus
-    }
+    # In Autopilot clusters version 1.25+, Managed Prometheus is automatically enabled
+    # managed_prometheus {
+    #   enabled = var.enable_managed_prometheus
+    # }
   }
 
   # Network policy for enhanced security
@@ -150,23 +151,24 @@ resource "google_container_cluster" "autopilot_cluster" {
   # Resource labels for cost tracking and management
   resource_labels = local.common_labels
 
-  # Cost optimization: enable cluster autoscaling
-  dynamic "cluster_autoscaling" {
-    for_each = var.enable_cluster_autoscaling ? [1] : []
-    content {
-      enabled = true
-      resource_limits {
-        resource_type = "cpu"
-        minimum       = var.min_cpu_cores
-        maximum       = var.max_cpu_cores
-      }
-      resource_limits {
-        resource_type = "memory"
-        minimum       = var.min_memory_gb
-        maximum       = var.max_memory_gb
-      }
-    }
-  }
+  # Cost optimization: cluster autoscaling (not compatible with Autopilot)
+  # Autopilot manages autoscaling automatically
+  # dynamic "cluster_autoscaling" {
+  #   for_each = var.enable_cluster_autoscaling ? [1] : []
+  #   content {
+  #     enabled = true
+  #     resource_limits {
+  #       resource_type = "cpu"
+  #       minimum       = var.min_cpu_cores
+  #       maximum       = var.max_cpu_cores
+  #     }
+  #     resource_limits {
+  #       resource_type = "memory"
+  #       minimum       = var.min_memory_gb
+  #       maximum       = var.max_memory_gb
+  #     }
+  #   }
+  # }
 
   lifecycle {
     ignore_changes = []

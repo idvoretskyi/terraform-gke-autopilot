@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: demo-go-app
-        image: demo-go-app:latest
+        image: gcr.io/idv-dev-0/demo-go-app:latest
         ports:
         - containerPort: 8080
           protocol: TCP
