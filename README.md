@@ -268,8 +268,8 @@ For full CI/CD functionality, configure these GitHub secrets:
 
 All PRs trigger:
 - Terraform validation and formatting checks
-- Security scanning with tfsec and Checkov
-- Unit tests and cost estimation
+- Security scanning with tfsec
+- Unit tests
 - Automatic Terraform plans for both dev and prod environments
 
 ## License

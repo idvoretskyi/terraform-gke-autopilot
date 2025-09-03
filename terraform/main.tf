@@ -76,7 +76,7 @@ resource "google_container_cluster" "autopilot_cluster" {
   # Intranode visibility cannot be enabled on Autopilot
 
   # Autopilot manages IPs; keep minimal explicit config
-  // checkov:skip=CKV_GCP_69: GKE Autopilot enforces GKE Metadata Server and Workload Identity; node_config not configurable
+  # GKE Autopilot enforces GKE Metadata Server and Workload Identity; node_config not configurable
   ip_allocation_policy {
     cluster_secondary_range_name  = "pods"
     services_secondary_range_name = "services"
