@@ -10,18 +10,23 @@ terraform {
       version = ">= 2.0"
     }
   }
-  backend "gcs" {}
+  # backend "gcs" {}  # Commented out to use local state
 }
 
 provider "google" {
   # Credentials and project can be inferred from gcloud auth/application-default credentials.
 }
 
+# Get current username dynamically
+data "external" "current_user" {
+  program = ["bash", "-c", "echo '{\"username\":\"'$(whoami)'\"}'"]
+}
+
 module "gke_autopilot" {
   source = "./modules/gke-autopilot"
 
   # Basic configuration
-  cluster_name = var.cluster_name
+  cluster_name = var.cluster_name != "autopilot-cluster" ? var.cluster_name : "${data.external.current_user.result.username}-autopilot-cluster"
   region       = var.region
   project_id   = var.project_id
   environment  = var.environment
