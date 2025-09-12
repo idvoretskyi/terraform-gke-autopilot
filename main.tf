@@ -28,6 +28,8 @@ module "gke_autopilot" {
   # Basic configuration
   cluster_name = var.cluster_name != "autopilot-cluster" ? var.cluster_name : "${data.external.current_user.result.username}-autopilot-cluster"
   region       = var.region
+  zone         = var.zone
+  cluster_type = var.cluster_type
   project_id   = var.project_id
   environment  = var.environment
 
@@ -36,6 +38,7 @@ module "gke_autopilot" {
   labels                     = var.labels
   enable_cluster_autoscaling = var.enable_cluster_autoscaling
   enable_cost_management     = var.enable_cost_management
+  deletion_protection        = var.deletion_protection
 
   # Observability settings (cost-optimized defaults)
   logging_components        = var.logging_components

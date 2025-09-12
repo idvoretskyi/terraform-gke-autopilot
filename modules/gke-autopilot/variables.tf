@@ -11,9 +11,26 @@ variable "cluster_name" {
 }
 
 variable "region" {
-  description = "The region to deploy to. If empty, uses gcloud region or derives from zone."
+  description = "The region to deploy to. Used for regional clusters. If empty, uses gcloud region or derives from zone."
   type        = string
   default     = ""
+}
+
+variable "zone" {
+  description = "The zone to deploy to. Used for zonal clusters (cost-effective). If empty, uses gcloud zone."
+  type        = string
+  default     = ""
+}
+
+variable "cluster_type" {
+  description = "Cluster type: 'regional' for high availability (required for Autopilot)"
+  type        = string
+  default     = "regional"
+  
+  validation {
+    condition     = contains(["regional"], var.cluster_type)
+    error_message = "Autopilot clusters must be 'regional' - zonal clusters are not supported."
+  }
 }
 
 variable "project_id" {
@@ -193,5 +210,11 @@ variable "enable_cost_management" {
   description = "Enable GKE cost management features"
   type        = bool
   default     = true
+}
+
+variable "deletion_protection" {
+  description = "Whether to enable deletion protection for the cluster"
+  type        = bool
+  default     = false
 }
 

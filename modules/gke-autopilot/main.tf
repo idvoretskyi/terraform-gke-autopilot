@@ -56,6 +56,17 @@ locals {
     "us-central1"
   )
 
+  # Zone resolution with smart fallback
+  zone = coalesce(
+    var.zone != "" ? var.zone : null,
+    local.gcloud_zone != "" ? local.gcloud_zone : null,
+    data.google_client_config.current.zone != null ? data.google_client_config.current.zone : null,
+    "${local.region}-a"
+  )
+
+  # Cluster location based on type
+  cluster_location = var.cluster_type == "zonal" ? local.zone : local.region
+
   # Cost optimization labels
   common_labels = merge(var.labels, {
     environment = var.environment
@@ -67,11 +78,14 @@ locals {
 
 resource "google_container_cluster" "autopilot_cluster" {
   name     = var.cluster_name
-  location = local.region
+  location = local.cluster_location
   project  = local.project_id
 
   # Autopilot for serverless, pay-per-request resources
   enable_autopilot = true
+  
+  # Deletion protection
+  deletion_protection = var.deletion_protection
 
   # Conservative channel for stability and predictable behavior
   release_channel {
