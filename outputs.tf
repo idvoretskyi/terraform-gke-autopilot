@@ -1,4 +1,5 @@
-# Cluster information
+# Simplified Root Outputs
+
 output "kubernetes_cluster_name" {
   description = "GKE Cluster Name"
   value       = module.gke_autopilot.cluster_name
@@ -36,25 +37,12 @@ output "workload_identity_pool" {
   value       = module.gke_autopilot.workload_identity_pool
 }
 
-# kubectl configuration command
 output "kubectl_config_command" {
   description = "Command to configure kubectl"
   value       = "gcloud container clusters get-credentials ${module.gke_autopilot.cluster_name} --region ${module.gke_autopilot.region} --project ${module.gke_autopilot.project_id}"
 }
 
-# Cost optimization info
 output "cluster_labels" {
   description = "Applied cluster labels for cost tracking"
   value       = module.gke_autopilot.cluster_labels
-}
-
-# Dynamic configuration info
-output "gcloud_config_used" {
-  description = "Gcloud configuration values that were dynamically detected"
-  value       = module.gke_autopilot.gcloud_config_used
-}
-
-output "config_source" {
-  description = "Source of configuration values (shows what was used: variable, gcloud, or default)"
-  value       = module.gke_autopilot.config_source
 }
