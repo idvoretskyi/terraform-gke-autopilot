@@ -2,9 +2,9 @@
 data "google_client_config" "current" {}
 
 locals {
-  # Simple configuration resolution
+  # Simple configuration resolution with fallbacks
   project_id = var.project_id != "" ? var.project_id : data.google_client_config.current.project
-  region     = var.region != "" ? var.region : data.google_client_config.current.region
+  region     = var.region != "" ? var.region : coalesce(data.google_client_config.current.region, "us-central1")
 }
 
 resource "google_container_cluster" "autopilot_cluster" {

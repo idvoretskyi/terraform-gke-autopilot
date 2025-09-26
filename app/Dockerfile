@@ -1,36 +1,17 @@
-# Build stage
-FROM golang:1.25-alpine AS builder
+# Multi-stage build for minimal image size
+FROM golang:1.21-alpine AS builder
 
 WORKDIR /app
-
-# Copy go mod files
-COPY go.mod go.sum* ./
-
-# Download dependencies
+COPY go.mod ./
 RUN go mod download
+COPY main.go .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o app main.go
 
-# Copy source code
-COPY . .
-
-# Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
-
-# Final stage
+# Final stage - minimal image
 FROM alpine:latest
-
-# Install ca-certificates for HTTPS requests if needed
 RUN apk --no-cache add ca-certificates
-
-WORKDIR /root/
-
-# Copy the binary from builder stage
-COPY --from=builder /app/main .
-
-# Expose port 8080
+WORKDIR /
+COPY --from=builder /app/app .
 EXPOSE 8080
-
-# Set environment variable
 ENV PORT=8080
-
-# Run the application
-CMD ["./main"]
+CMD ["./app"]
