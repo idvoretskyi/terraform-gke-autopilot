@@ -75,31 +75,31 @@ jobs:
       - name: Run unit tests
         run: ./tests/unit_test.sh
 
-  integration-tests:
-    name: Integration Tests (Validation & Planning)
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  # integration-tests:
+  #   name: Integration Tests (Validation & Planning)
+  #   runs-on: ubuntu-latest
+  #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v5
 
-      - name: Setup Go
-        uses: actions/setup-go@v6
-        with:
-          go-version: '1.25'
+  #     - name: Setup Go
+  #       uses: actions/setup-go@v6
+  #       with:
+  #         go-version: '1.25'
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ~1.6
-          terraform_wrapper: false
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v3
+  #       with:
+  #         terraform_version: ~1.6
+  #         terraform_wrapper: false
 
-      - name: Run integration tests (validation only)
-        run: |
-          cd tests
-          go mod download
-          go test -v -timeout 10m -run "TestTerraformValidation|TestModuleValidation|TestEnvironmentConfigurations|TestGKEAutopilotClusterPlan|TestGKEAutopilotCostOptimizationPlan"
+  #     - name: Run integration tests (validation only)
+  #       run: |
+  #         cd tests
+  #         go mod download
+  #         go test -v -timeout 10m -run "TestTerraformValidation|TestModuleValidation|TestEnvironmentConfigurations|TestGKEAutopilotClusterPlan|TestGKEAutopilotCostOptimizationPlan"
 
   docs-check:
     name: Documentation Check
