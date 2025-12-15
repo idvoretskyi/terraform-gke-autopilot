@@ -5,11 +5,15 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
+<<<<<<< HEAD
       version = ">= 4.47.0, < 7.11"
     }
     external = {
       source  = "hashicorp/external"
       version = ">= 2.0"
+=======
+      version = ">= 4.47.0, < 8.0"
+>>>>>>> e530ab6 (feat: enhance GKE Autopilot module with dedicated networking and improved variable validation; add unit tests for health and info handlers)
     }
   }
 }
@@ -18,17 +22,12 @@ provider "google" {
   # Uses gcloud auth or application-default credentials
 }
 
-# Get current username for cluster naming
-data "external" "current_user" {
-  program = ["bash", "-c", "echo '{\"username\":\"'$(whoami)'\"}'"]
-}
-
 # GKE Autopilot Module
 module "gke_autopilot" {
   source = "./modules/gke-autopilot"
 
   # Basic configuration
-  cluster_name        = var.cluster_name != "autopilot-cluster" ? var.cluster_name : "${data.external.current_user.result.username}-autopilot-cluster"
+  cluster_name        = var.cluster_name
   region              = var.region
   project_id          = var.project_id
   environment         = var.environment

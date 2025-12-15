@@ -6,10 +6,11 @@ A streamlined Terraform configuration for deploying Google Kubernetes Engine (GK
 
 - **Simplified Architecture**: Clean, minimal configuration focused on essential features
 - **GKE Autopilot**: Fully managed Kubernetes with automatic scaling and cost optimization
+- **Dedicated Networking**: Automatically provisions a VPC and Subnet for the cluster
 - **Cost-Optimized**: Minimal logging/monitoring components and efficient resource usage
 - **Easy Deployment**: Single command deployment with sensible defaults
 - **Workload Identity**: Secure, keyless access to Google APIs
-- **Sample Application**: Includes a Go web app for testing deployment
+- **Sample Application**: Includes a Go web app with graceful shutdown and health checks
 
 ## Repository Structure
 
@@ -26,6 +27,7 @@ A streamlined Terraform configuration for deploying Google Kubernetes Engine (GK
 │       └── versions.tf
 ├── app/                      # Sample Go web application
 │   ├── main.go
+│   ├── main_test.go
 │   ├── Dockerfile
 │   └── README.md
 └── k8s/                      # Kubernetes manifests

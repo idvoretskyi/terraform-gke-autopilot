@@ -22,6 +22,10 @@ variable "environment" {
   description = "Environment name (dev, staging, prod)"
   type        = string
   default     = "dev"
+  validation {
+    condition     = contains(["dev", "staging", "prod"], var.environment)
+    error_message = "Environment must be one of: dev, staging, prod."
+  }
 }
 
 variable "cost_center" {
@@ -33,7 +37,11 @@ variable "cost_center" {
 variable "release_channel" {
   description = "GKE release channel (RAPID, REGULAR, STABLE)"
   type        = string
-  default     = "STABLE"
+  default     = "RAPID"
+  validation {
+    condition     = contains(["RAPID", "REGULAR", "STABLE"], var.release_channel)
+    error_message = "Release channel must be one of: RAPID, REGULAR, STABLE."
+  }
 }
 
 variable "deletion_protection" {
@@ -49,7 +57,11 @@ variable "logging_components" {
 }
 
 variable "monitoring_components" {
+
   description = "List of monitoring components to enable"
+
   type        = list(string)
+
   default     = ["SYSTEM_COMPONENTS"]
+
 }
