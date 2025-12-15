@@ -5,15 +5,7 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-<<<<<<< HEAD
-      version = ">= 4.47.0, < 7.11"
-    }
-    external = {
-      source  = "hashicorp/external"
-      version = ">= 2.0"
-=======
       version = ">= 4.47.0, < 8.0"
->>>>>>> e530ab6 (feat: enhance GKE Autopilot module with dedicated networking and improved variable validation; add unit tests for health and info handlers)
     }
   }
 }
