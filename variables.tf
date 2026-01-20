@@ -60,8 +60,8 @@ variable "monitoring_components" {
 
   description = "List of monitoring components to enable"
 
-  type        = list(string)
+  type = list(string)
 
-  default     = ["SYSTEM_COMPONENTS"]
+  default = ["SYSTEM_COMPONENTS"]
 
 }
