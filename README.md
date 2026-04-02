@@ -96,7 +96,7 @@ A streamlined Terraform configuration for deploying Google Kubernetes Engine (GK
 | `region` | GCP region for deployment | `""` (uses gcloud config) |
 | `project_id` | GCP project ID | `""` (uses gcloud config) |
 | `environment` | Environment label | `"dev"` |
-| `deletion_protection` | Enable deletion protection | `false` |
+| `deletion_protection` | Enable deletion protection | `true` |
 
 ### Customization Example
 
@@ -118,7 +118,7 @@ region       = "us-central1"
 ## Security Features
 
 - **Workload Identity**: Secure service-to-service authentication
-- **Latest Kubernetes**: STABLE release channel for security updates
+- **Latest Kubernetes**: RAPID release channel for early access to updates
 - **Resource Labels**: Proper tagging for governance and cost tracking
 
 ## Maintenance

@@ -46,3 +46,8 @@ output "cluster_labels" {
   description = "Applied cluster labels for cost tracking"
   value       = module.gke_autopilot.cluster_labels
 }
+
+output "cluster_version" {
+  description = "Current master version of the GKE cluster"
+  value       = module.gke_autopilot.cluster_version
+}
