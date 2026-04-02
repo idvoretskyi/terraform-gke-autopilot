@@ -16,8 +16,6 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
       containers:
       - name: app
         # Replace <PROJECT_ID> with your GCP project ID before applying.

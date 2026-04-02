@@ -3,11 +3,13 @@
 # Stage 1: build
 FROM golang:1.24-alpine AS builder
 
+ARG VERSION=dev
+
 WORKDIR /app
 COPY go.mod ./
 RUN go mod download
 COPY *.go ./
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o app .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-X main.Version=${VERSION} -w -s" -o app .
 
 # Stage 2: minimal runtime image
 FROM alpine:3.21

@@ -10,13 +10,13 @@ echo "==> Running unit tests"
 echo ""
 echo "--- Terraform (root) ---"
 cd "$ROOT_DIR"
-terraform init -backend=false -upgrade -no-color
+terraform init -backend=false -no-color
 terraform validate -no-color
 echo "Root config valid."
 
 echo ""
 echo "--- Terraform (module) ---"
-terraform -chdir=modules/gke-autopilot init -backend=false -upgrade -no-color
+terraform -chdir=modules/gke-autopilot init -backend=false -no-color
 terraform -chdir=modules/gke-autopilot validate -no-color
 echo "Module config valid."
 

@@ -92,5 +92,5 @@ docker build \
 ## Cleanup
 
 ```bash
-kubectl delete -f k8s/deployment.yaml
+kubectl delete -f ../k8s/deployment.yaml
 ```
