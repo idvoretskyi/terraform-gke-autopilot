@@ -1,134 +1,96 @@
 # Demo Go Application
 
-A simple web application designed to demonstrate deployment on GKE Autopilot cluster.
-
-## Features
-
-- Simple HTTP server with multiple endpoints
-- Health check endpoint for Kubernetes probes
-- JSON API endpoint with application information
-- Web interface with application details
-- Docker containerization ready
-- Kubernetes deployment manifests included
+A simple HTTP web application demonstrating deployment on a GKE Autopilot cluster.
 
 ## Endpoints
 
-- `GET /` - Web interface with application information
-- `GET /health` - Health check endpoint (returns JSON)
-- `GET /api/info` - JSON API with application details
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/` | GET | HTML page with server info |
+| `/health` | GET | Health check — returns `{"status":"healthy","timestamp":"..."}` |
+| `/api/info` | GET | JSON application info (name, version, hostname, environment) |
 
 ## Local Development
 
 ### Prerequisites
 
-- Go 1.21 or later
-- Docker (for containerization)
+- Go 1.24 or later
 
-### Running Locally
+### Run locally
 
-1. Navigate to the app directory:
-   ```bash
-   cd app
-   ```
+```bash
+cd app
+go run .
+# open http://localhost:8080
+```
 
-2. Run the application:
-   ```bash
-   go run main.go
-   ```
+### Run tests
 
-3. Open your browser and visit: http://localhost:8080
+```bash
+cd app
+go test -v ./...
+```
 
-## Docker Build
+## Docker
 
-1. Build the Docker image:
-   ```bash
-   cd app
-   docker build -t demo-go-app:latest .
-   ```
+### Build
 
-2. Run the container locally:
-   ```bash
-   docker run -p 8080:8080 demo-go-app:latest
-   ```
+```bash
+cd app
+docker build -t demo-go-app:latest .
+```
+
+### Run
+
+```bash
+docker run -p 8080:8080 demo-go-app:latest
+```
+
+### Build with version injection
+
+```bash
+docker build \
+  --build-arg VERSION=1.2.3 \
+  -t demo-go-app:1.2.3 .
+```
 
 ## Deploy to GKE Autopilot
 
 ### Prerequisites
 
 1. GKE Autopilot cluster deployed (use the Terraform configuration in the parent directory)
-2. Docker image pushed to a container registry
-3. `kubectl` configured to access your cluster
+2. `kubectl` configured to access the cluster
+3. Docker image pushed to a container registry
 
 ### Steps
 
-1. **Build and push the Docker image to Google Container Registry:**
+1. **Build and push to Google Artifact Registry (or GCR):**
    ```bash
-   cd app
-   
-   # Get your project ID
    PROJECT_ID=$(gcloud config get-value project)
-   
-   # Build and tag the image
-   docker build -t gcr.io/$PROJECT_ID/demo-go-app:latest .
-   
-   # Push to GCR
-   docker push gcr.io/$PROJECT_ID/demo-go-app:latest
+   cd app
+   gcloud builds submit --tag gcr.io/$PROJECT_ID/demo-go-app:latest .
    ```
 
-2. **Update the Kubernetes deployment with your image:**
+2. **Update the image reference in the manifest:**
    ```bash
-   cd ../k8s
-   
-   # Replace the image reference in deployment.yaml
-   sed -i "s|demo-go-app:latest|gcr.io/$PROJECT_ID/demo-go-app:latest|g" deployment.yaml
+   sed -i "s|<PROJECT_ID>|$PROJECT_ID|g" ../k8s/deployment.yaml
    ```
 
-3. **Deploy to Kubernetes:**
+3. **Apply:**
    ```bash
-   kubectl apply -f deployment.yaml
+   kubectl apply -f ../k8s/deployment.yaml
+   kubectl get service demo-go-app-service --watch
    ```
-
-4. **Check the deployment status:**
-   ```bash
-   kubectl get deployments
-   kubectl get pods
-   kubectl get services
-   ```
-
-5. **Get the external IP address:**
-   ```bash
-   kubectl get service demo-go-app-service
-   ```
-   
-   Wait for the `EXTERNAL-IP` to be assigned (it may take a few minutes).
-
-6. **Access your application:**
-   Once you have the external IP, you can access your application at:
-   ```
-   http://EXTERNAL-IP
-   ```
-
-## Kubernetes Resources
-
-The deployment creates:
-
-- **Deployment**: Runs 2 replicas of the Go application with resource limits
-- **Service**: LoadBalancer service exposing the application on port 80
-- **Health Checks**: Liveness and readiness probes using the `/health` endpoint
 
 ## Resource Configuration
 
-- **CPU Request**: 100m (0.1 CPU cores)
-- **CPU Limit**: 500m (0.5 CPU cores)  
-- **Memory Request**: 128Mi
-- **Memory Limit**: 256Mi
-
-These settings are optimized for cost-efficiency on GKE Autopilot.
+| Resource | Request | Limit |
+|----------|---------|-------|
+| CPU | 100m | 500m |
+| Memory | 128Mi | 256Mi |
 
 ## Cleanup
 
-To remove the application from your cluster:
-
 ```bash
-kubectl delete -f k8s/deployment.yaml
+kubectl delete -f ../k8s/deployment.yaml
 ```

@@ -1,15 +1,14 @@
-# Simplified Terraform GKE Autopilot Cluster
+# Terraform GKE Autopilot Cluster
 
-A streamlined Terraform configuration for deploying Google Kubernetes Engine (GKE) Autopilot clusters with cost optimization and best practices.
+A Terraform configuration for deploying Google Kubernetes Engine (GKE) Autopilot clusters with cost optimization and security best practices, plus a sample Go web application.
 
 ## Features
 
-- **Simplified Architecture**: Clean, minimal configuration focused on essential features
-- **GKE Autopilot**: Fully managed Kubernetes with automatic scaling and cost optimization
-- **Dedicated Networking**: Automatically provisions a VPC and Subnet for the cluster
+- **GKE Autopilot**: Fully managed Kubernetes with automatic scaling
+- **Dedicated Networking**: Provisions a VPC, subnet, and configurable CIDR ranges
 - **Cost-Optimized**: Minimal logging/monitoring components and efficient resource usage
-- **Easy Deployment**: Single command deployment with sensible defaults
 - **Workload Identity**: Secure, keyless access to Google APIs
+- **Deletion Protection**: Enabled by default to prevent accidental cluster deletion
 - **Sample Application**: Includes a Go web app with graceful shutdown and health checks
 
 ## Repository Structure
@@ -17,10 +16,10 @@ A streamlined Terraform configuration for deploying Google Kubernetes Engine (GK
 ```
 .
 ├── main.tf                    # Root Terraform configuration
-├── variables.tf               # Configuration variables
+├── variables.tf               # Input variables with defaults and validations
 ├── outputs.tf                 # Cluster outputs
 ├── modules/
-│   └── gke-autopilot/        # GKE Autopilot module
+│   └── gke-autopilot/        # GKE Autopilot reusable module
 │       ├── main.tf
 │       ├── variables.tf
 │       ├── outputs.tf
@@ -30,8 +29,10 @@ A streamlined Terraform configuration for deploying Google Kubernetes Engine (GK
 │   ├── main_test.go
 │   ├── Dockerfile
 │   └── README.md
-└── k8s/                      # Kubernetes manifests
-    └── deployment.yaml
+├── k8s/                      # Kubernetes manifests
+│   └── deployment.yaml
+└── tests/
+    └── unit_test.sh          # Terraform and Go unit tests
 ```
 
 ## Quick Start
@@ -50,7 +51,7 @@ A streamlined Terraform configuration for deploying Google Kubernetes Engine (GK
    cd terraform-gke-autopilot
    ```
 
-2. **Configure your GCP project (optional):**
+2. **Configure your GCP project (optional — uses gcloud config if omitted):**
    ```bash
    gcloud config set project YOUR_PROJECT_ID
    gcloud config set compute/region YOUR_REGION
@@ -65,7 +66,7 @@ A streamlined Terraform configuration for deploying Google Kubernetes Engine (GK
 
 4. **Configure kubectl:**
    ```bash
-   gcloud container clusters get-credentials <cluster-name> --region <region>
+   $(terraform output -raw kubectl_config_command)
    ```
 
 ### Deploy Sample Application
@@ -76,71 +77,63 @@ A streamlined Terraform configuration for deploying Google Kubernetes Engine (GK
    gcloud builds submit --tag gcr.io/$(gcloud config get-value project)/demo-go-app:latest .
    ```
 
-2. **Deploy to Kubernetes:**
+2. **Update the image reference in the manifest:**
    ```bash
-   kubectl apply -f ../k8s/deployment.yaml
+   sed -i "s|<PROJECT_ID>|$(gcloud config get-value project)|g" k8s/deployment.yaml
    ```
 
-3. **Get the external IP:**
+3. **Deploy to Kubernetes:**
    ```bash
+   kubectl apply -f k8s/deployment.yaml
    kubectl get service demo-go-app-service
    ```
 
 ## Configuration
 
-### Essential Variables
+### Variables
 
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `cluster_name` | Name of the GKE cluster | `"autopilot-cluster"` |
 | `region` | GCP region for deployment | `""` (uses gcloud config) |
 | `project_id` | GCP project ID | `""` (uses gcloud config) |
-| `environment` | Environment label | `"dev"` |
+| `environment` | Environment label (dev/staging/prod) | `"dev"` |
+| `cost_center` | Cost center for billing | `"engineering"` |
+| `release_channel` | GKE release channel (RAPID/REGULAR/STABLE) | `"RAPID"` |
 | `deletion_protection` | Enable deletion protection | `true` |
+| `subnet_cidr` | Primary VPC subnet CIDR | `"10.0.0.0/16"` |
+| `pods_cidr` | Pod secondary range CIDR | `"10.1.0.0/16"` |
+| `services_cidr` | Services secondary range CIDR | `"10.2.0.0/16"` |
 
-### Customization Example
-
-Create a `terraform.tfvars` file:
+### Example `terraform.tfvars`
 
 ```hcl
-cluster_name = "my-autopilot-cluster"
-environment  = "production"
-region       = "us-central1"
+cluster_name        = "my-autopilot-cluster"
+environment         = "prod"
+region              = "us-central1"
+project_id          = "my-gcp-project"
+release_channel     = "REGULAR"
+deletion_protection = true
 ```
 
-## Cost Optimization Features
+## Cost Optimization
 
 - **Autopilot Mode**: Pay only for running workloads, not idle nodes
 - **Minimal Logging**: Only system components logging enabled by default
-- **Efficient Monitoring**: Basic monitoring configuration to reduce costs
-- **Regional Deployment**: Required for Autopilot, provides high availability
+- **Efficient Monitoring**: Basic monitoring to reduce costs
+- **Regional Deployment**: Required for Autopilot; provides high availability
 
-## Security Features
+## Security
 
-- **Workload Identity**: Secure service-to-service authentication
-- **Latest Kubernetes**: RAPID release channel for early access to updates
+- **Workload Identity**: Secure service-to-service authentication without key files
+- **RAPID Release Channel**: Access to the latest Kubernetes patches quickly
+- **Deletion Protection**: Enabled by default to prevent accidental cluster removal
 - **Resource Labels**: Proper tagging for governance and cost tracking
-
-## Maintenance
-
-- **Automatic Updates**: Managed by GKE Autopilot
-- **Maintenance Window**: Configured for off-hours (2-6 AM UTC)
-- **No Node Management**: Autopilot handles all node operations
 
 ## Cleanup
 
-To destroy all resources:
-
 ```bash
+# Disable deletion protection first if enabled
+terraform apply -var="deletion_protection=false"
 terraform destroy
 ```
-
-## Support
-
-This is a simplified, production-ready configuration suitable for:
-- Development environments
-- Small to medium production workloads
-- Teams wanting minimal operational overhead
-- Cost-conscious deployments
-
-For advanced features like private clusters, custom networking, or enterprise security, consider extending the module configuration.

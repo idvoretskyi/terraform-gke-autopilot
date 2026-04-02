@@ -2,8 +2,8 @@
 *.tfstate
 *.tfstate.*
 *.tfvars
+!modules/gke-autopilot/terraform.tfvars
 .terraform/
-.terraform.lock.hcl
 override.tf
 *_override.tf
 

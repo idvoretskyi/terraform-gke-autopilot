@@ -6,57 +6,64 @@ This directory contains reusable Terraform modules for infrastructure deployment
 
 ### gke-autopilot
 
-A simplified, production-ready Terraform module for deploying Google Kubernetes Engine (GKE) Autopilot clusters with cost optimization and best practices.
+A production-ready Terraform module for deploying Google Kubernetes Engine (GKE) Autopilot clusters with cost optimization and security best practices.
 
 **Features:**
-- ✨ **Simplified Configuration** - Minimal variables, smart defaults
-- 💰 **Cost-Optimized** - Efficient logging/monitoring, regional deployment
-- 🔒 **Security-First** - Workload Identity, configurable release channel
-- 🚀 **Production-Ready** - Maintenance windows, proper labeling
-- 📊 **Autopilot Benefits** - Serverless nodes, pay-per-workload pricing
+- Simplified configuration with smart defaults
+- Cost-optimized logging and monitoring
+- Workload Identity for secure, keyless GCP access
+- Configurable networking (VPC, subnet, pod/service CIDRs)
+- Maintenance windows and proper resource labeling
+- Deletion protection enabled by default
 
-**Quick Usage:**
+**Usage:**
 ```hcl
 module "gke_cluster" {
   source = "./modules/gke-autopilot"
 
-  cluster_name = "my-autopilot-cluster"
-  region       = "us-central1"
-  environment  = "production"
+  cluster_name        = "my-autopilot-cluster"
+  region              = "us-central1"
+  environment         = "production"
+  cost_center         = "engineering"
+  release_channel     = "REGULAR"
+  deletion_protection = true
+  logging_components    = ["SYSTEM_COMPONENTS"]
+  monitoring_components = ["SYSTEM_COMPONENTS"]
 }
 ```
 
-**Key Variables:**
+**Variables:**
+
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `cluster_name` | Name of the GKE cluster | `"autopilot-cluster"` |
-| `region` | GCP region for deployment | `""` (uses gcloud config) |
+| `cluster_name` | Name of the GKE cluster | (required) |
+| `region` | GCP region | `""` (uses gcloud config) |
 | `project_id` | GCP project ID | `""` (uses gcloud config) |
-| `environment` | Environment label | `"dev"` |
-| `cost_center` | Cost center for billing | `"engineering"` |
-| `release_channel` | GKE release channel | `"RAPID"` |
-| `deletion_protection` | Enable deletion protection | `true` |
+| `environment` | Environment label | (required) |
+| `cost_center` | Cost center for billing | (required) |
+| `release_channel` | GKE release channel | (required) |
+| `deletion_protection` | Enable deletion protection | (required) |
+| `subnet_cidr` | Primary subnet CIDR | `"10.0.0.0/16"` |
+| `pods_cidr` | Pod secondary range CIDR | `"10.1.0.0/16"` |
+| `services_cidr` | Services secondary range CIDR | `"10.2.0.0/16"` |
 
 **Outputs:**
-- `cluster_name` - The name of the created cluster
-- `cluster_host` - The cluster endpoint (sensitive)
-- `cluster_ca_certificate` - The cluster CA certificate (sensitive)
-- `region` - The region where the cluster is deployed
-- `project_id` - The GCP project ID
-- `cluster_location` - The cluster location
-- `workload_identity_pool` - Workload Identity pool for service accounts
-- `cluster_version` - Current master version of the cluster
-- `cluster_labels` - Labels applied to the cluster
+- `cluster_name` — the name of the created cluster
+- `cluster_host` — the cluster endpoint (sensitive)
+- `cluster_ca_certificate` — the cluster CA certificate (sensitive)
+- `cluster_version` — current master version
+- `region` — region where the cluster is deployed
+- `project_id` — GCP project ID
+- `cluster_location` — cluster location
+- `workload_identity_pool` — Workload Identity pool
+- `cluster_labels` — labels applied to the cluster
 
 **Requirements:**
 - Terraform >= 1.0
 - Google Provider >= 4.47.0, < 8.0
 - Authenticated gcloud CLI or Application Default Credentials
 
-**Important Notes:**
-- ⚠️ **Autopilot clusters are always regional** (zonal not supported)
-- 🔧 **Automatic node management** - No need to manage node pools
-- 💡 **Smart fallbacks** - Uses gcloud config when variables not provided
-- 🏷️ **Proper labeling** - Includes environment, cost center, and management tags
-
-For detailed usage and advanced configuration, see the main project README.md.
+**Notes:**
+- Autopilot clusters are always regional (zonal not supported)
+- Uses gcloud config as fallback when `project_id` / `region` are empty
+- For standalone validation: `terraform -chdir=modules/gke-autopilot validate`
