@@ -1,4 +1,4 @@
-# Simplified GKE Autopilot Configuration
+# GKE Autopilot Configuration
 
 terraform {
   required_version = ">= 1.0"
@@ -14,7 +14,6 @@ provider "google" {
   # Uses gcloud auth or application-default credentials
 }
 
-# GKE Autopilot Module
 module "gke_autopilot" {
   source = "./modules/gke-autopilot"
 

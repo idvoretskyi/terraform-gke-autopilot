@@ -1,17 +1,26 @@
-# Multi-stage build for minimal image size
-FROM golang:1.21-alpine AS builder
+# Multi-stage build for a minimal, secure image
+
+# Stage 1: build
+FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
 COPY go.mod ./
 RUN go mod download
-COPY main.go .
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o app main.go
+COPY *.go ./
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o app .
 
-# Final stage - minimal image
-FROM alpine:latest
-RUN apk --no-cache add ca-certificates
-WORKDIR /
+# Stage 2: minimal runtime image
+FROM alpine:3.21
+
+RUN apk --no-cache add ca-certificates && \
+    addgroup -S appgroup && \
+    adduser -S appuser -G appgroup
+
+WORKDIR /app
 COPY --from=builder /app/app .
+
+USER appuser
+
 EXPOSE 8080
 ENV PORT=8080
 CMD ["./app"]

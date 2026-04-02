@@ -1,39 +1,43 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
-echo "Running unit tests..."
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
-# Change to the root directory
-cd "$(dirname "$0")/.."
+echo "==> Running unit tests"
 
-# --- Terraform Tests ---
-echo "--- Terraform ---"
-echo "Validating main Terraform configuration..."
-terraform init -backend=false
-terraform validate
+# --- Terraform ---
+echo ""
+echo "--- Terraform (root) ---"
+cd "$ROOT_DIR"
+terraform init -backend=false -upgrade -no-color
+terraform validate -no-color
+echo "Root config valid."
 
-echo "Validating module Terraform configuration..."
-cd modules/gke-autopilot
-terraform init -backend=false
-terraform validate
-cd ../..
+echo ""
+echo "--- Terraform (module) ---"
+terraform -chdir=modules/gke-autopilot init -backend=false -upgrade -no-color
+terraform -chdir=modules/gke-autopilot validate -no-color
+echo "Module config valid."
 
-echo "Checking Terraform formatting..."
+echo ""
+echo "--- Terraform formatting ---"
 if ! terraform fmt -check -recursive .; then
-    echo "Terraform formatting issues found. Run 'terraform fmt -recursive .' to fix."
-    exit 1
+	echo "ERROR: Terraform formatting issues found. Run 'terraform fmt -recursive .' to fix."
+	exit 1
 fi
+echo "Formatting OK."
 
-# --- Go Application Tests ---
-echo "--- Go Application ---"
-echo "Running Go unit tests..."
-cd app
-if command -v go &> /dev/null; then
-    go test -v ./...
+# --- Go Application ---
+echo ""
+echo "--- Go application ---"
+if command -v go &>/dev/null; then
+	cd "$ROOT_DIR/app"
+	go test -v -race ./...
+	echo "Go tests passed."
 else
-    echo "Go is not installed. Skipping Go tests."
+	echo "SKIP: Go is not installed."
 fi
-cd ..
 
-echo "All unit tests passed successfully!"
+echo ""
+echo "==> All tests passed."

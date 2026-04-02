@@ -52,7 +52,7 @@ variable "release_channel" {
 }
 
 variable "deletion_protection" {
-  description = "Enable deletion protection for the cluster"
+  description = "Enable deletion protection for the cluster. Defaults to true for safety."
   type        = bool
   default     = true
 }

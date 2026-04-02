@@ -14,9 +14,15 @@ spec:
       labels:
         app: demo-go-app
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
       containers:
       - name: app
-        image: gcr.io/PROJECT_ID/demo-go-app:latest
+        # Replace <PROJECT_ID> with your GCP project ID before applying.
+        # Example: gcr.io/my-project/demo-go-app:v1.0.0
+        image: gcr.io/<PROJECT_ID>/demo-go-app:latest
         ports:
         - containerPort: 8080
         env:
@@ -29,6 +35,11 @@ spec:
           limits:
             cpu: 500m
             memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
         livenessProbe:
           httpGet:
             path: /health

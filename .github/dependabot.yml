@@ -1,6 +1,6 @@
 version: 2
 updates:
-  # Terraform provider updates
+  # Terraform provider updates (root)
   - package-ecosystem: "terraform"
     directory: "/"
     schedule:
@@ -40,9 +40,9 @@ updates:
       - "terraform"
       - "module"
 
-  # Go dependencies for tests
+  # Go dependencies for the app
   - package-ecosystem: "gomod"
-    directory: "/tests"
+    directory: "/app"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -58,7 +58,7 @@ updates:
     labels:
       - "dependencies"
       - "go"
-      - "tests"
+      - "app"
 
   # GitHub Actions updates
   - package-ecosystem: "github-actions"

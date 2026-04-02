@@ -1,8 +1,8 @@
-# Simplified GKE Autopilot Module
+# GKE Autopilot Module
 data "google_client_config" "current" {}
 
 locals {
-  # Simple configuration resolution with fallbacks
+  # Resolve project and region from variables, with fallback to gcloud config
   project_id = var.project_id != "" ? var.project_id : data.google_client_config.current.project
   region     = var.region != "" ? var.region : coalesce(data.google_client_config.current.region, "us-central1")
 }
@@ -53,11 +53,11 @@ resource "google_container_cluster" "autopilot_cluster" {
     channel = var.release_channel
   }
 
-  # Maintenance window
+  # Maintenance window: daily 02:00–06:00 UTC
   maintenance_policy {
     recurring_window {
-      start_time = "2022-01-01T02:00:00Z"
-      end_time   = "2022-01-01T06:00:00Z"
+      start_time = "2025-01-01T02:00:00Z"
+      end_time   = "2025-01-01T06:00:00Z"
       recurrence = "FREQ=DAILY"
     }
   }
