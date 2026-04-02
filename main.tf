@@ -30,4 +30,9 @@ module "gke_autopilot" {
   # Observability (cost-optimized)
   logging_components    = var.logging_components
   monitoring_components = var.monitoring_components
+
+  # Networking
+  subnet_cidr   = var.subnet_cidr
+  pods_cidr     = var.pods_cidr
+  services_cidr = var.services_cidr
 }

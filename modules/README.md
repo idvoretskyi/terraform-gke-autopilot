@@ -11,7 +11,7 @@ A simplified, production-ready Terraform module for deploying Google Kubernetes 
 **Features:**
 - ✨ **Simplified Configuration** - Minimal variables, smart defaults
 - 💰 **Cost-Optimized** - Efficient logging/monitoring, regional deployment
-- 🔒 **Security-First** - Workload Identity, STABLE release channel
+- 🔒 **Security-First** - Workload Identity, configurable release channel
 - 🚀 **Production-Ready** - Maintenance windows, proper labeling
 - 📊 **Autopilot Benefits** - Serverless nodes, pay-per-workload pricing
 
@@ -34,8 +34,8 @@ module "gke_cluster" {
 | `project_id` | GCP project ID | `""` (uses gcloud config) |
 | `environment` | Environment label | `"dev"` |
 | `cost_center` | Cost center for billing | `"engineering"` |
-| `release_channel` | GKE release channel | `"STABLE"` |
-| `deletion_protection` | Enable deletion protection | `false` |
+| `release_channel` | GKE release channel | `"RAPID"` |
+| `deletion_protection` | Enable deletion protection | `true` |
 
 **Outputs:**
 - `cluster_name` - The name of the created cluster
@@ -50,7 +50,7 @@ module "gke_cluster" {
 
 **Requirements:**
 - Terraform >= 1.0
-- Google Provider >= 4.47.0, < 7.4
+- Google Provider >= 4.47.0, < 8.0
 - Authenticated gcloud CLI or Application Default Credentials
 
 **Important Notes:**

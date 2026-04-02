@@ -15,19 +15,19 @@ resource "google_compute_network" "vpc" {
 
 resource "google_compute_subnetwork" "subnet" {
   name          = "${var.cluster_name}-subnet"
-  ip_cidr_range = "10.0.0.0/16"
+  ip_cidr_range = var.subnet_cidr
   region        = local.region
   network       = google_compute_network.vpc.id
   project       = local.project_id
 
   secondary_ip_range {
     range_name    = "pods"
-    ip_cidr_range = "10.1.0.0/16"
+    ip_cidr_range = var.pods_cidr
   }
 
   secondary_ip_range {
     range_name    = "services"
-    ip_cidr_range = "10.2.0.0/16"
+    ip_cidr_range = var.services_cidr
   }
 }
 
